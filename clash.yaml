@@ -10,6 +10,7 @@ proxy-providers:
     type: http
     url: "{url}"
     path: ./proxies/subscribe.yaml
+    interval: 86400
     health-check:
       enable: true
       interval: 600
@@ -18,7 +19,6 @@ proxy-providers:
 proxy-groups:
   - name: 🚀 节点选择
     type: select
-    lazy: true
     use:
       - subscribe
     proxies:
@@ -27,7 +27,6 @@ proxy-groups:
 
   - name: 🎯 全球直连
     type: select
-    lazy: true
     proxies:
       - DIRECT
       - 🚀 节点选择
@@ -35,7 +34,13 @@ proxy-groups:
 
   - name: 🤖 OPENAI
     type: select
-    lazy: true
+    use:
+      - subscribe
+    proxies:
+      - DIRECT
+
+  - name: 🍎 苹果服务
+    type: select
     use:
       - subscribe
     proxies:
@@ -43,7 +48,6 @@ proxy-groups:
 
   - name: ♻️ 自动选择
     type: url-test
-    lazy: true
     use:
       - subscribe
 
@@ -53,10 +57,12 @@ proxy-groups:
       - 🚀 节点选择
       - 🎯 全球直连
       - ♻️ 自动选择
-    lazy: true
     use:
       - subscribe
 
+# https://github.com/blackmatrix7/ios_rule_script
+# https://github.com/ACL4SSR/ACL4SSR/tree/master
+# https://github.com/Loyalsoldier/clash-rules/tree/release
 rule-providers:
   reject:
     type: http
@@ -86,13 +92,6 @@ rule-providers:
     path: ./ruleset/google.yaml
     interval: 86400
 
-  openai:
-    behavior: classical
-    type: http
-    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml"
-    path: ./ruleset/openai.yaml
-    interval: 86400
-
   proxy:
     type: http
     behavior: domain
@@ -114,19 +113,19 @@ rule-providers:
     path: ./ruleset/private.yaml
     interval: 86400
 
-  gfw:
-    type: http
-    behavior: domain
-    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt"
-    path: ./ruleset/gfw.yaml
-    interval: 86400
+  # gfw:
+  #   type: http
+  #   behavior: domain
+  #   url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt"
+  #   path: ./ruleset/gfw.yaml
+  #   interval: 86400
 
-  tld-not-cn:
-    type: http
-    behavior: domain
-    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/tld-not-cn.txt"
-    path: ./ruleset/tld-not-cn.yaml
-    interval: 86400
+  # tld-not-cn:
+  #   type: http
+  #   behavior: domain
+  #   url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/tld-not-cn.txt"
+  #   path: ./ruleset/tld-not-cn.yaml
+  #   interval: 86400
 
   telegramcidr:
     type: http
@@ -156,17 +155,36 @@ rule-providers:
     path: ./ruleset/applications.yaml
     interval: 86400
 
+  openai:
+    behavior: classical
+    type: http
+    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml"
+    path: ./ruleset/openai.yaml
+    interval: 86400
+
+  steamcn:
+    behavior: classical
+    type: http
+    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/SteamCN/SteamCN.yaml"
+    path: ./ruleset/steamcn.yaml
+    interval: 86400
+
 rules:
+  # 直连规则，上面的有限
+  - RULE-SET,steamcn,🎯 全球直连
   - RULE-SET,applications,🎯 全球直连
   - DOMAIN,clash.razord.top,🎯 全球直连
   - DOMAIN,yacd.haishan.me,🎯 全球直连
   - RULE-SET,private,🎯 全球直连
   - RULE-SET,reject,REJECT
-  - RULE-SET,icloud,🎯 全球直连
-  - RULE-SET,apple,🎯 全球直连
+
+  # 代理规则
+  - RULE-SET,icloud,🍎 苹果服务
+  - RULE-SET,apple,🍎 苹果服务
   - RULE-SET,openai,🤖 OPENAI
   - RULE-SET,google,🚀 节点选择
   - RULE-SET,proxy,🚀 节点选择
+
   - RULE-SET,direct,🎯 全球直连
   - RULE-SET,lancidr,🎯 全球直连
   - RULE-SET,cncidr,🎯 全球直连
