@@ -179,7 +179,7 @@ rule-providers:
     interval: 86400
 
 rules:
-  # 直连规则，上面的有限
+  # 直连规则，规则是从上至下查找的，所以上面的规则将会覆盖下面的规则
   - RULE-SET,steamcn,🎯 全球直连
   - RULE-SET,applications,🎯 全球直连
   - DOMAIN,clash.razord.top,🎯 全球直连
